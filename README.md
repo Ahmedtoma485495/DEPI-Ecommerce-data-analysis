@@ -106,3 +106,28 @@ FROM (
 ) AS last_purchase_table
 GROUP BY last_seen_month
 ORDER BY last_seen_month DESC;
+```
+
+---
+
+## 🎯 Executive Business Insights
+
+* **High Customer Retention:** 96.6% of purchasing customers placed repeat orders. Repeat transactions surpassed new order volume starting mid-2024, proving strong market activation.
+* **Churn Risk Monitoring:** Recency analysis revealed the exact distribution of inactive users, providing a clear window to launch re-engagement campaigns for customers dormant for over 90 days.
+* **Revenue Velocity:** GMV grew 45x from $5.5K (Jan 2024) to a peak of $245.4K (Mar 2025). Discount policy remained stable at ~10.5% throughout the growth window.
+* **Category Dominance:** Electronics (ELEC) is the primary revenue engine with an average item price of ~$165, double the next leading category.
+
+---
+
+## 🛠️ Tech Stack & Tools
+
+* **Exploratory Data Analysis:** Python (pandas, matplotlib, seaborn)
+* **Database Querying:** SQL (SQLite, Subqueries)
+* **Business Intelligence:** Power BI (DAX, Data Modeling)
+
+---
+
+## 👤 Maintainer
+
+**Ahmed Mohamed**  
+GitHub: [@Ahmedtoma485495](https://github.com/Ahmedtoma485495)
