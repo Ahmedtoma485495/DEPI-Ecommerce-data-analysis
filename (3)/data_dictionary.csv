@@ -1,0 +1,122 @@
+table_name,column_name,column_description
+p1_applications,amount_req,Requested loan amount (currency). Target Loan-to-Wage ratio ~7× with noise.
+p1_applications,app_id,Unique loan application ID. Primary key; join to p1_funded_loans.app_id.
+p1_applications,channel,"Origination channel ∈ {Branch, Broker, Online, RM}."
+p1_applications,decision,"Final credit decision ∈ {APPROVED, REJECTED}, from a logistic of wage growth, L/W, dpd."
+p1_applications,decision_dt,Decision timestamp = request_dt + 1–9 days.
+p1_applications,est_id,Establishment ID submitting the application. Join to p1_payroll_monthly/p1_bureau_summary.
+p1_applications,reason_code,Rejection reason if decision=REJECTED; NULL otherwise.
+p1_applications,region,"Establishment region ∈ {Cairo, Giza, Alexandria, Riyadh, Jeddah}."
+p1_applications,request_dt,Application request timestamp (2024-02-01..2025-07-31).
+p1_applications,risk_grade_app,"Risk grade A–F derived from L/W, bureau dpd, and noise (A best, F worst)."
+p1_applications,sector,"Establishment sector ∈ {Retail, Manufacturing, Services, Construction, Healthcare, Tech}."
+p1_applications,tenor_m,"Requested tenor in months ∈ {6,9,12,18,24,36}."
+p1_bureau_summary,active_loans,Number of currently active loans.
+p1_bureau_summary,dpd30_plus,Count of trade lines with 30+ days past due (integer ≥0).
+p1_bureau_summary,est_id,Synthetic Establishment ID. Join to payroll and applications.
+p1_bureau_summary,last_default_dt,Timestamp of most recent default if any (populated mainly when dpd30_plus>2). NULL otherwise.
+p1_bureau_summary,max_delinquency,Maximum days past due observed on any line.
+p1_bureau_summary,snapshot_dt,Bureau snapshot date (2025-07-31).
+p1_bureau_summary,total_loans,Total lifetime number of loans reported for the establishment.
+p1_funded_loans,amount_funded,"Funded amount (currency), close to amount_req with ±5–10% noise."
+p1_funded_loans,app_id,Application ID for loans that got funded (~90% of approved). Join to p1_applications.app_id.
+p1_funded_loans,funded_dt,Funding date = decision_dt + 1–6 days.
+p1_funded_loans,rate_apr,Annual Percentage Rate (decimal). Baseline ~8% with add-ons for tenor>12 and grades D–F.
+p1_payroll_monthly,est_id,Synthetic Establishment ID. Primary join key to p1_bureau_summary.est_id and p1_applications.est_id.
+p1_payroll_monthly,headcount,Number of employees on payroll in the given month (integer ≥3).
+p1_payroll_monthly,wage_sum,Total wage payout for the month (synthetic currency units). Used for wage growth and L/W ratios.
+p1_payroll_monthly,ym,Payroll snapshot month in 'YYYY-MM' format. Monthly cadence from 2024-02 to 2025-07.
+p2_order_items,order_id,Order ID; join to p2_orders.order_id.
+p2_order_items,price,Unit price (currency) before discounts.
+p2_order_items,qty,Quantity for this line (integer ≥1).
+p2_order_items,sku,"Stock keeping unit: <CATEGORY>-###### where CATEGORY ∈ {ELEC, HOME, FASH, SPORT, BEAUTY, GROC}."
+p2_orders,cogs,"Cost of goods sold (currency), ~55–80% of item values."
+p2_orders,device,"Ordering device ∈ {Web, App}."
+p2_orders,discount,"Discount amount (currency), typically ~10% of GMV, capped ~35%."
+p2_orders,gmv,Gross Merchandise Value (currency) = sum(item price × qty) for the order.
+p2_orders,order_dt,Order timestamp; on/after signup_dt.
+p2_orders,order_id,"Unique order ID. Primary key; join to p2_order_items.order_id, p2_returns.order_id."
+p2_orders,region,Order region inherited from the user.
+p2_orders,shipping_cost,"Shipping cost (currency), region-dependent (≈2–5)."
+p2_orders,user_id,Buyer ID; join to p2_users.user_id.
+p2_returns,order_id,Returned order ID (~10% of orders). Join to p2_orders.order_id.
+p2_returns,reason,"Return reason ∈ {Damaged, Wrong size, Changed mind, Late delivery, Other}."
+p2_returns,return_dt,Return timestamp ≈ order_dt + 2–19 days.
+p2_users,channel,"Acquisition channel ∈ {SEO, Paid, Referral, Direct, Social}."
+p2_users,region,"User region ∈ {Cairo, Giza, Alexandria, Riyadh, Jeddah, AbuDhabi}."
+p2_users,signup_dt,User signup timestamp (2024-01-01..2025-07-15).
+p2_users,user_id,Unique user ID (shopper). Primary key; join to p2_orders.user_id.
+p3_billing_monthly,charge_usd,Nominal monthly charge in USD by plan (~8/14/22).
+p3_billing_monthly,paid_usd,Amount actually paid in USD; may be lower if overdue/partial.
+p3_billing_monthly,sub_id,Subscription ID; join to p3_subs.sub_id.
+p3_billing_monthly,ym,Month bucket (timestamp of 1st day) for billing cycle.
+p3_qos_daily,d,Date for QoS metrics.
+p3_qos_daily,dropped_calls,Number of dropped calls that day (integer).
+p3_qos_daily,latency_ms,Network latency in milliseconds (float). Lower is better.
+p3_qos_daily,sub_id,Subscription ID; join to p3_subs.sub_id.
+p3_qos_daily,throughput_mbps,Downlink throughput in Mbps (float). Higher is better.
+p3_subs,channel,"Acquisition channel ∈ {Retail, Online, Dealer}."
+p3_subs,end_dt,Subscription end date if churned; NULL if active (truncated to ≤ 2025-07-31).
+p3_subs,msisdn,Synthetic phone number (string).
+p3_subs,plan,"Tariff plan ∈ {Basic, Standard, Premium}."
+p3_subs,region,"Subscriber region ∈ {Cairo, Giza, Alexandria, Riyadh, Jeddah}."
+p3_subs,start_dt,Subscription start date (2024-01-01..2025-05-31).
+p3_subs,sub_id,Unique subscription ID. Primary key; join to p3_usage_daily/p3_qos_daily/p3_billing_monthly/p3_tickets.
+p3_tickets,category,"Ticket category ∈ {Billing, Network, Device, Other}."
+p3_tickets,close_dt,Ticket close datetime (open_dt + 1..14 days).
+p3_tickets,open_dt,Ticket open datetime.
+p3_tickets,sub_id,Subscription ID; join to p3_subs.sub_id.
+p3_usage_daily,d,Usage date (daily while active).
+p3_usage_daily,data_mb,Mobile data used that day in MB (float).
+p3_usage_daily,sms_cnt,SMS count that day (integer).
+p3_usage_daily,sub_id,Subscription ID; join to p3_subs.sub_id.
+p3_usage_daily,voice_min,Voice minutes used that day (float).
+p4_driver_pings,driver_id,Driver ID; join to p4_drivers.driver_id.
+p4_driver_pings,lat,Driver latitude at ping time.
+p4_driver_pings,lon,Driver longitude at ping time.
+p4_driver_pings,ts,Ping timestamp near the ride request time.
+p4_drivers,city,"Driver home city ∈ {Cairo, Riyadh, Jeddah, Dubai}."
+p4_drivers,driver_id,Unique driver ID. Primary key; join to p4_rides and p4_driver_pings.
+p4_drivers,signup_dt,Driver signup date (2024-06-01..2025-06-30).
+p4_drivers,status,"Driver account status ∈ {Active, Inactive}."
+p4_rides,cancel_reason,Cancellation reason when cancelled; NULL otherwise.
+p4_rides,driver_id,Assigned driver ID; join to p4_drivers.
+p4_rides,drop_lat,Drop-off latitude.
+p4_rides,drop_lon,Drop-off longitude.
+p4_rides,eta_req_s,Estimated time to pickup (seconds) at request time.
+p4_rides,fare_usd,"Final fare in USD ≈ base(distance,time) × surge × noise."
+p4_rides,pickup_lat,Pickup latitude.
+p4_rides,pickup_lon,Pickup longitude.
+p4_rides,request_ts,Ride request timestamp (2024-10-01..2025-07-31).
+p4_rides,ride_id,Unique ride ID. Primary key.
+p4_rides,status,"Ride outcome ∈ {completed, cancelled}."
+p4_rides,surge_mult,"Surge multiplier (1.0–~2.2), higher during peaks and rain."
+p4_rides,trip_s,Observed trip duration (seconds).
+p4_rides,user_id,Synthetic rider user ID (one-off per ride).
+p4_weather,city,City for the weather observation.
+p4_weather,dt,Date of weather observation (daily).
+p4_weather,rain_mm,Rainfall in millimeters (0 for most days in arid cities).
+p4_weather,temp_c,Average daily temperature in °C.
+p4_weather,wind_kph,Average daily wind speed in km/h.
+p5_claims,admit_dt,Admission date for the episode.
+p5_claims,city,City of service inherited from provider.
+p5_claims,claim_id,Unique medical claim ID. Primary key; join to p5_procedures.claim_id.
+p5_claims,copay_amt,Patient copay portion (currency) ≈ 5–20% of paid_amt.
+p5_claims,denied_flag,"Denial indicator (1 denied, 0 otherwise)."
+p5_claims,discharge_dt,Discharge date; determines length of stay.
+p5_claims,drg,Diagnosis-Related Group code (DRG101–DRG130 synthetic set).
+p5_claims,paid_amt,Total paid amount for the claim (currency).
+p5_claims,patient_id,Patient ID; join to p5_patients.patient_id.
+p5_claims,provider_id,Provider ID; join to p5_providers.provider_id.
+p5_patients,age_band,"Age band ∈ {0-17, 18-34, 35-49, 50-64, 65+}."
+p5_patients,gender,"Patient gender ∈ {F, M}."
+p5_patients,patient_id,Unique patient ID. Primary key; join to p5_claims.patient_id.
+p5_patients,plan_type,"Insurance plan ∈ {HMO, PPO, EPO}."
+p5_procedures,claim_id,Claim ID; join to p5_claims.claim_id. Multiple procedures per claim possible.
+p5_procedures,cpt,Procedure code (CPT1001–CPT1100).
+p5_procedures,paid_amt,Paid amount associated with this CPT line (currency).
+p5_procedures,units,Number of units billed for the CPT (integer ≥1).
+p5_providers,accreditation_level,"Accreditation level ∈ {A, B, C} (A best)."
+p5_providers,city,"Provider city ∈ {Cairo, Giza, Alexandria, Riyadh, Jeddah, Dubai, AbuDhabi}."
+p5_providers,provider_id,Unique provider ID. Primary key; join to p5_claims.provider_id.
+p5_providers,specialty,"Provider specialty ∈ {Cardiology, Orthopedics, General, Pediatrics, Oncology, Obstetrics, Neurology}."
