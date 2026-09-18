@@ -30,8 +30,15 @@ This project was built collaboratively by a 6-person team as part of the Digital
 ├── dashboard/
 │   └── E_Commerce_Dashboard.pbix             # Dynamic Power BI dashboard workbook
 └── README.md                                 # Project documentation
-##📊 Dataset Scope & Data Model
-The analysis covers 32 months of operational data across 6 regions (Cairo, Giza, Alexandria, Jeddah, Riyadh, Abu Dhabi) and 2 device channels (Web / App).Plaintext
+```
+
+---
+
+## 📊 Dataset Scope & Data Model
+
+The analysis covers 32 months of operational data across 6 regions (Cairo, Giza, Alexandria, Jeddah, Riyadh, Abu Dhabi) and 2 device channels (Web / App).
+
+```text
    ┌─────────────────┐             ┌─────────────────┐
    │    p2_users     │             │    p2_orders    │
    ├─────────────────┤             ├─────────────────┤
@@ -56,9 +63,24 @@ The analysis covers 32 months of operational data across 6 regions (Cairo, Giza,
    │       reason    │             │       qty       │
    └─────────────────┘             │       price     │
                                    └─────────────────┘
-TableRecordsKey FieldsPurposep2_users3,000user_id, region, channel, signup_dtCustomer directory containing registration dates, channel source, and home region.p2_orders15,000order_id, user_id, order_dt, gmv, discount...Main order header data tracking financials, device type, and shipping destination.p2_order_items38,655order_id, sku, qty, priceLine-item details capturing item quantities, price points, and SKU categories.p2_returns1,531order_id, return_dt, reasonReturned order logs recording timestamps and categorized return reasons.
-##🗄️ SQL Analytics
- (Customer Valuation Focus)As the lead for Customer Valuation, I designed SQL workflows utilizing Subqueries and Case Statements to extract cohort behaviors and customer loyalty metrics:1. Customer Retention (New vs. Repeat Customer Orders)SQLSELECT 
+```
+
+| Table | Records | Key Fields | Purpose |
+| :--- | :--- | :--- | :--- |
+| **p2_users** | 3,000 | user_id, region, channel, signup_dt | Customer directory containing registration dates, channel source, and home region. |
+| **p2_orders** | 15,000 | order_id, user_id, order_dt, gmv, discount... | Main order header data tracking financials, device type, and shipping destination. |
+| **p2_order_items**| 38,655 | order_id, sku, qty, price | Line-item details capturing item quantities, price points, and SKU categories. |
+| **p2_returns** | 1,531 | order_id, return_dt, reason | Returned order logs recording timestamps and categorized return reasons. |
+
+---
+
+## 🗄️ SQL Analytics (Customer Valuation Focus)
+
+As the lead for Customer Valuation, I designed SQL workflows utilizing **Subqueries and Case Statements** to extract cohort behaviors and customer loyalty metrics:
+
+### 1. Customer Retention (New vs. Repeat Customer Orders)
+```sql
+SELECT 
     strftime('%Y-%m', o.order_dt) AS order_month,
     SUM(CASE WHEN o.order_dt = f.first_date THEN 1 ELSE 0 END) AS new_orders,
     SUM(CASE WHEN o.order_dt != f.first_date THEN 1 ELSE 0 END) AS repeat_orders
@@ -70,7 +92,11 @@ JOIN (
 ) f ON o.user_id = f.user_id
 GROUP BY order_month
 ORDER BY order_month;
-2. Inactive Customers (Churn Analysis via Recency)SQLSELECT 
+```
+
+### 2. Inactive Customers (Churn Analysis via Recency)
+```sql
+SELECT 
     strftime('%Y-%m', last_date) AS last_seen_month,
     COUNT(user_id) AS inactive_users_count
 FROM (
@@ -80,8 +106,3 @@ FROM (
 ) AS last_purchase_table
 GROUP BY last_seen_month
 ORDER BY last_seen_month DESC;
-##🎯 Executive Business
- InsightsHigh Customer Retention: 96.6% of purchasing customers placed repeat orders. Repeat transactions surpassed new order volume starting mid-2024, proving strong market activation.Churn Risk Monitoring: Recency analysis revealed the exact distribution of inactive users, providing a clear window to launch re-engagement campaigns for customers dormant for over 90 days.Revenue Velocity: GMV grew 45x from $5.5K (Jan 2024) to a peak of $245.4K (Mar 2025). Discount policy remained stable at ~10.5% throughout the growth window.Category Dominance: Electronics (ELEC) is the primary revenue engine with an average item price of ~$165, double the next leading category.
-🛠️ Tech Stack & ToolsExploratory Data Analysis: Python (pandas, matplotlib, seaborn)Database Querying: SQL (SQLite, Subqueries)Business Intelligence: Power BI (DAX, Data Modeling)
-👤 MaintainerAhmed MohamedGitHub: @Ahmedtoma485495
-
